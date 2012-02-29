@@ -60,7 +60,7 @@ int main( int argc, char** argv )
     int c = 0, fps = 0;
 
     //capture from camera
-    CvCapture *capture = cvCaptureFromCAM(0);
+    CvCapture *capture = cvCaptureFromCAM(1);
     //quit if camera not found
     if(!capture) {
         printf("cannot init capture!\n");
@@ -97,7 +97,7 @@ int main( int argc, char** argv )
         bullshit(frame);
 
         if(flag)
-            cvPutText(frame, "edge", cvPoint(10, 400), &font, cvScalar(0, 255, 0, 0));
+            cvPutText(frame, "edge", cvPoint(30, 400), &font, cvScalar(255, 0, 0, 0));
 
         //display center of gravity in coordinates
         COG(&cog_x, &cog_y);
@@ -110,9 +110,11 @@ int main( int argc, char** argv )
         
         //CvFont font;
         //cvInitFont(&font, CV_FONT_HERSHEY_SIMPLEX, 1.0, 1.0, 0, 2, CV_AA);
+        cvPutText(frame, "x:", cvPoint(0,300), &font, cvScalar(255, 0, 0, 0));
+        cvPutText(frame, "y:", cvPoint(0,350), &font, cvScalar(255, 0, 0, 0));
 
-        //cvPutText(frame, x_coord, cvPoint(10,300), &font, cvScalar(0, 255, 0, 0));
-        cvPutText(frame, y_coord, cvPoint(10,350), &font, cvScalar(255, 0, 0, 0));
+        cvPutText(frame, x_coord, cvPoint(30,300), &font, cvScalar(255, 0, 0, 0));
+        cvPutText(frame, y_coord, cvPoint(30,350), &font, cvScalar(255, 0, 0, 0));
 
 
         //avoid memory leaks
