@@ -16,9 +16,35 @@ IplImage *final = 0;
 float low = 110.0f, high = 150.0f;
 float cog_x = 0.0, cog_y = 0.0;
 
+IplImage *gray = 0, *bw = 0;
+int flag = 0;
+
 void doShit(IplImage*);
 
 void COG(float*, float*);
+
+void bullshit()
+{
+    //IplImage *gray = 0, *bw = 0;
+    gray = cvCreateImage(cvSize(image->width, image->height), IPL_DEPTH_8U, 1);
+    cvCvtColor(frame, gray, CV_BGR2GRAY);
+    cvThreshold(gray, bw, 128, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
+
+    
+    float intensity = 0.0, accum = 0.0;
+    int x, y;
+    for(x = 0; x < final->width; x++)
+    {
+        for(y = 0; y < final->height; y++)
+        {
+            intensity = (float)(cvGetReal2D(final, y, x));
+            accum += intensity;
+        }
+    }
+
+    if(accum > 2000) flag = 1;
+    else flag = 0;
+}
 
 int main( int argc, char** argv )
 {
@@ -56,8 +82,14 @@ int main( int argc, char** argv )
         //edge detection - todo: HSV color filtering
         doShit(frame);
 
+
+        //edge detection
+        bullshit(frame);
+
+        if(flag)
+            cvPutText(frame, "edge", cvPoint(10, 400), &font, cvScalar(0, 255, 0, 0));
+
         //display center of gravity in coordinates
-        
         COG(&cog_x, &cog_y);
         char x_coord[10];
         char y_coord[10];
@@ -72,9 +104,7 @@ int main( int argc, char** argv )
         cvPutText(frame, x_coord, cvPoint(10,300), &font, cvScalar(0, 255, 0, 0));
         cvPutText(frame, y_coord, cvPoint(10,350), &font, cvScalar(0, 255, 0, 0));
 
-        /*cvCircle(frame, cvPoint(100,100), 50, cvScalar(255, 255, 255, 0), 1, 8,
-                0);
-        */
+
         //avoid memory leaks
         /*
         cvReleaseImage(&image);
