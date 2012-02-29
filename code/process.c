@@ -23,23 +23,26 @@ void doShit(IplImage*);
 
 void COG(float*, float*);
 
-void bullshit()
+void bullshit(IplImage *image)
 {
+
     //IplImage *gray = 0, *bw = 0;
     gray = cvCreateImage(cvSize(image->width, image->height), IPL_DEPTH_8U, 1);
 
     bw = cvCreateImage(cvSize(image->width, image->height), IPL_DEPTH_8U, 1);
     cvCvtColor(frame, gray, CV_BGR2GRAY);
-    cvThreshold(gray, bw, 128, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
+    cvThreshold(gray, bw, 128, 255, CV_THRESH_BINARY);
 
     
+    cvShowImage("bw", bw);
+
     float intensity = 0.0, accum = 0.0;
     int x, y;
-    for(x = 0; x < final->width; x++)
+    for(x = 0; x < bw->width; x++)
     {
-        for(y = 0; y < final->height; y++)
+        for(y = 0; y < bw->height; y++)
         {
-            intensity = (float)(cvGetReal2D(final, y, x));
+            intensity = (float)(cvGetReal2D(bw, y, x));
             accum += intensity;
         }
     }
@@ -66,6 +69,7 @@ int main( int argc, char** argv )
     //display original video stream
     cvNamedWindow("stream", CV_WINDOW_AUTOSIZE);
     cvNamedWindow("edges", CV_WINDOW_AUTOSIZE);
+    cvNamedWindow("bw", CV_WINDOW_AUTOSIZE);
     cvMoveWindow("edges", 400, 0);
 
 
@@ -86,7 +90,7 @@ int main( int argc, char** argv )
 
 
         //edge detection
-        bullshit();
+        bullshit(frame);
 
         if(flag)
             cvPutText(frame, "edge", cvPoint(10, 400), &font, cvScalar(0, 255, 0, 0));
