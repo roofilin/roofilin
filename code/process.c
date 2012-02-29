@@ -13,7 +13,7 @@
 IplImage *frame = 0;
 IplImage *image = 0, *red = 0, *red_edge = 0, *green = 0, *green_edge = 0, *edge = 0;
 IplImage *final = 0;
-float low = 110.0f, high = 150.0f;
+float low = 60.0f, high = 100.0f;
 float cog_x = 0.0, cog_y = 0.0;
 
 IplImage *gray = 0, *bw = 0;
@@ -28,26 +28,28 @@ void bullshit(IplImage *image)
 
     //IplImage *gray = 0, *bw = 0;
     gray = cvCreateImage(cvSize(image->width, image->height), IPL_DEPTH_8U, 1);
-
+    
     bw = cvCreateImage(cvSize(image->width, image->height), IPL_DEPTH_8U, 1);
     cvCvtColor(frame, gray, CV_BGR2GRAY);
-    cvThreshold(gray, bw, 128, 255, CV_THRESH_BINARY);
+    cvThreshold(gray, bw, 200, 255, CV_THRESH_BINARY);
 
     
-    cvShowImage("bw", bw);
+    //cvShowImage("bw", bw);
 
-    float intensity = 0.0, accum = 0.0;
+    int intensity = 0, accum = 0;
     int x, y;
     for(x = 0; x < bw->width; x++)
     {
         for(y = 0; y < bw->height; y++)
         {
-            intensity = (float)(cvGetReal2D(bw, y, x));
+            //printf("%d\n", intensity);
+            intensity = (int)(cvGetReal2D(bw, y, x)/255);
             accum += intensity;
         }
     }
-
-    if(accum > 2000) flag = 1;
+    //printf("%d\n", accum);
+    //printf("width: %d, height:%d\n", image->width, image->height);
+    if(accum > 10000) flag = 1;
     else flag = 0;
 }
 
@@ -69,7 +71,7 @@ int main( int argc, char** argv )
     //display original video stream
     cvNamedWindow("stream", CV_WINDOW_AUTOSIZE);
     cvNamedWindow("edges", CV_WINDOW_AUTOSIZE);
-    cvNamedWindow("bw", CV_WINDOW_AUTOSIZE);
+    //cvNamedWindow("bw", CV_WINDOW_AUTOSIZE);
     cvMoveWindow("edges", 400, 0);
 
 
@@ -101,8 +103,8 @@ int main( int argc, char** argv )
         char y_coord[10];
         sprintf(x_coord, "%1.2f", cog_x);
         sprintf(y_coord, "%1.2f", cog_y);
-        printf("%s\n", x_coord);
-        printf("%s\n", y_coord);
+        //printf("%s\n", x_coord);
+        //printf("%s\n", y_coord);
         
         //CvFont font;
         //cvInitFont(&font, CV_FONT_HERSHEY_SIMPLEX, 1.0, 1.0, 0, 2, CV_AA);
@@ -160,10 +162,9 @@ void doShit(IplImage *image)
 
     cvAbsDiff(red_edge, green_edge, edge);
 
-
     final = cvCreateImage(cvSize((image->width&-2)/2,(image->height&-2)/2), IPL_DEPTH_8U, 1);
 
-    cvPyrDown(edge, final, CV_GAUSSIAN_5x5);
+    cvPyrDown(edge, final, CV_GAUSSIAN_5x5);   //
     cvSmooth(final, final, CV_BLUR, 3, 0, 0, 0);
     cvCanny(final, final, 1.0f, 250.0f, 3);
     cvPyrUp(final, edge, CV_GAUSSIAN_5x5);
