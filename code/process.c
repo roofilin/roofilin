@@ -10,18 +10,19 @@
 #include <stdio.h>
 #endif
 
-//james sucks
-
+IplImage *frame = 0;
 IplImage *image = 0, *red = 0, *red_edge = 0, *green = 0, *green_edge = 0, *edge = 0;
 IplImage *final = 0;
 float low = 110.0f, high = 150.0f;
+float cog_x = 0.0, cog_y = 0.0;
 
 void doShit(IplImage*);
+
+void COG(float*, float*);
 
 int main( int argc, char** argv )
 {
     int c = 0, fps = 0;
-    IplImage *frame = 0;
 
     //capture from camera
     CvCapture *capture = cvCaptureFromCAM(2);
@@ -37,7 +38,7 @@ int main( int argc, char** argv )
     //display original video stream
     cvNamedWindow("stream", CV_WINDOW_AUTOSIZE);
     cvNamedWindow("edges", CV_WINDOW_AUTOSIZE);
-    cvMoveWindow("edges", 0, 400);
+    cvMoveWindow("edges", 400, 0);
 
     //keep capturing frames until escape
     while(c != 27) //27 is escape key
@@ -48,19 +49,43 @@ int main( int argc, char** argv )
         //show the default image
         cvShowImage("stream", frame);
 
+        //edge detection - todo: HSV color filtering
         doShit(frame);
 
+        //display center of gravity in coordinates
+        COG(&cog_x, &cog_y);
+        char x_coord[10];
+        char y_coord[10];
+        sprintf(x_coord, "%f1.2", cog_x);
+        sprintf(y_coord, "%f1.2", cog_y);
+        CvFont font;
+        cvInitFont(&font, CV_FONT_HERSHEY_SIMPLEX, 1.0, 1.0, 0, 1, CV_AA);
+        cvPutText(final, x_coord, cvPoint(10,10), &font, cvScalar(255, 255, 255, 0));
+        cvPutText(final, y_coord, cvPoint(30,10), &font, cvScalar(255, 255, 255, 0));
+
+        //avoid memory leaks
+        /*
         cvReleaseImage(&image);
         cvReleaseImage(&red);
         cvReleaseImage(&green);
         cvReleaseImage(&red_edge);
         cvReleaseImage(&green_edge);
         cvReleaseImage(&edge);
+        */
 
         c = cvWaitKey(10);
     }
 
     cvReleaseCapture(&capture);
+        //avoid memory leaks
+        cvReleaseImage(&image);
+        cvReleaseImage(&red);
+        cvReleaseImage(&green);
+        cvReleaseImage(&red_edge);
+        cvReleaseImage(&green_edge);
+        cvReleaseImage(&edge);
+        cvReleaseImage(&final);
+        cvReleaseImage(&frame);
 
     return 0;
 }
@@ -118,6 +143,27 @@ void doShit(IplImage *image)
     cvReleaseImage(&green_edge);
     cvReleaseImage(&edge);
     */
+}
+
+void COG(float *X, float *Y)
+{
+    float intensity = 0.0, accum = 0.0;
+    int x, y;
+    *X = 0.0;
+    *Y = 0.0;
+    for(x = 0; x < final->width; x++)
+    {
+        for(y = 0; y < final->height; y++)
+        {
+            intensity = (float)(cvGetReal2D(final, x, y));
+            *X += x*intensity;
+            *Y += y*intensity;
+            accum += intensity;
+        }
+    }
+
+    *X /= accum;
+    *Y /= accum;
 }
 
 #ifdef _EiC
