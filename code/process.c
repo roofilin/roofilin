@@ -25,7 +25,7 @@ int main( int argc, char** argv )
     int c = 0, fps = 0;
 
     //capture from camera
-    CvCapture *capture = cvCaptureFromCAM(2);
+    CvCapture *capture = cvCaptureFromCAM(1);
     //quit if camera not found
     if(!capture) {
         printf("cannot init capture!\n");
@@ -40,6 +40,10 @@ int main( int argc, char** argv )
     cvNamedWindow("edges", CV_WINDOW_AUTOSIZE);
     cvMoveWindow("edges", 400, 0);
 
+
+        CvFont font;
+        cvInitFont(&font, CV_FONT_HERSHEY_SIMPLEX, 1.0, 1.0, 0, 2, CV_AA);
+
     //keep capturing frames until escape
     while(c != 27) //27 is escape key
     {
@@ -47,22 +51,30 @@ int main( int argc, char** argv )
         if(!(frame = cvQueryFrame(capture))) break;
 
         //show the default image
-        cvShowImage("stream", frame);
+//        cvShowImage("stream", frame);
 
         //edge detection - todo: HSV color filtering
         doShit(frame);
 
         //display center of gravity in coordinates
+        
         COG(&cog_x, &cog_y);
         char x_coord[10];
         char y_coord[10];
-        sprintf(x_coord, "%f1.2", cog_x);
-        sprintf(y_coord, "%f1.2", cog_y);
-        CvFont font;
-        cvInitFont(&font, CV_FONT_HERSHEY_SIMPLEX, 1.0, 1.0, 0, 1, CV_AA);
-        cvPutText(final, x_coord, cvPoint(10,10), &font, cvScalar(255, 255, 255, 0));
-        cvPutText(final, y_coord, cvPoint(30,10), &font, cvScalar(255, 255, 255, 0));
+        sprintf(x_coord, "%1.2f", cog_x);
+        sprintf(y_coord, "%1.2f", cog_y);
+        printf("%s\n", x_coord);
+        printf("%s\n", y_coord);
+        
+        //CvFont font;
+        //cvInitFont(&font, CV_FONT_HERSHEY_SIMPLEX, 1.0, 1.0, 0, 2, CV_AA);
 
+        cvPutText(frame, x_coord, cvPoint(10,300), &font, cvScalar(0, 255, 0, 0));
+        cvPutText(frame, y_coord, cvPoint(10,350), &font, cvScalar(0, 255, 0, 0));
+
+        /*cvCircle(frame, cvPoint(100,100), 50, cvScalar(255, 255, 255, 0), 1, 8,
+                0);
+        */
         //avoid memory leaks
         /*
         cvReleaseImage(&image);
@@ -72,7 +84,8 @@ int main( int argc, char** argv )
         cvReleaseImage(&green_edge);
         cvReleaseImage(&edge);
         */
-
+        
+        cvShowImage("stream", frame);
         c = cvWaitKey(10);
     }
 
@@ -155,7 +168,7 @@ void COG(float *X, float *Y)
     {
         for(y = 0; y < final->height; y++)
         {
-            intensity = (float)(cvGetReal2D(final, x, y));
+            intensity = (float)(cvGetReal2D(final, y, x));
             *X += x*intensity;
             *Y += y*intensity;
             accum += intensity;
