@@ -13,6 +13,7 @@
 IplImage *frame = 0;
 IplImage *image = 0, *red = 0, *red_edge = 0, *green = 0, *green_edge = 0, *edge = 0;
 IplImage *final = 0;
+IplImage *thresh = 0;
 float low = 60.0f, high = 100.0f;
 float cog_x = 0.0, cog_y = 0.0;
 
@@ -22,6 +23,7 @@ int flag = 0;
 void doShit(IplImage*);
 
 void COG(float*, float*);
+
 
 void bullshit(IplImage *image)
 {
@@ -70,9 +72,9 @@ int main( int argc, char** argv )
 
     //display original video stream
     cvNamedWindow("stream", CV_WINDOW_AUTOSIZE);
-    cvNamedWindow("edges", CV_WINDOW_AUTOSIZE);
-    //cvNamedWindow("bw", CV_WINDOW_AUTOSIZE);
-    cvMoveWindow("edges", 400, 0);
+    //cvNamedWindow("edges", CV_WINDOW_AUTOSIZE);
+    cvNamedWindow("hue", CV_WINDOW_AUTOSIZE);
+    //cvMoveWindow("edges", 400, 0);
 
 
         CvFont font;
@@ -109,7 +111,7 @@ int main( int argc, char** argv )
         //CvFont font;
         //cvInitFont(&font, CV_FONT_HERSHEY_SIMPLEX, 1.0, 1.0, 0, 2, CV_AA);
 
-        cvPutText(frame, x_coord, cvPoint(10,300), &font, cvScalar(0, 255, 0, 0));
+        //cvPutText(frame, x_coord, cvPoint(10,300), &font, cvScalar(0, 255, 0, 0));
         cvPutText(frame, y_coord, cvPoint(10,350), &font, cvScalar(0, 255, 0, 0));
 
 
@@ -144,6 +146,20 @@ int main( int argc, char** argv )
 
 void doShit(IplImage *image)
 {
+
+    IplImage *hsv = cvCreateImage(cvGetSize(image), 8, 3);
+    IplImage *hue = cvCreateImage(cvGetSize(image), 8, 1);
+
+    cvCvtColor(image, hsv, CV_BGR2HSV);
+
+    cvSplit(hsv, hue, 0, 0, 0);
+    
+
+    thresh = cvCreateImage(cvSize(image->width, image->height), IPL_DEPTH_8U, 1);
+    cvThreshold(hue, thresh, 30, 255, CV_THRESH_BINARY_INV);
+
+    //cvCanny(hue, hue, low, high, 3);
+    cvShowImage("hue", thresh);
 
     //cvNamedWindow("orig", CV_WINDOW_AUTOSIZE);
     //cvShowImage("orig", image);
@@ -182,7 +198,7 @@ void doShit(IplImage *image)
     //cvShowImage("edges", edge);
 
     //cvNamedWindow("final", CV_WINDOW_AUTOSIZE);
-    cvShowImage("edges", final);
+    //cvShowImage("edges", final);
 
     //cvWaitKey(0);
     /*
@@ -201,11 +217,11 @@ void COG(float *X, float *Y)
     int x, y;
     *X = 0.0;
     *Y = 0.0;
-    for(x = 0; x < final->width; x++)
+    for(x = 0; x < thresh->width; x++)
     {
-        for(y = 0; y < final->height; y++)
+        for(y = 0; y < thresh->height; y++)
         {
-            intensity = (float)(cvGetReal2D(final, y, x));
+            intensity = (float)(cvGetReal2D(thresh, y, x));
             *X += x*intensity;
             *Y += y*intensity;
             accum += intensity;
