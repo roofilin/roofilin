@@ -20,23 +20,19 @@ float cog_x = 0.0, cog_y = 0.0;
 IplImage *gray = 0, *bw = 0;
 int flag = 0;
 
-void doShit(IplImage*);
+void findLine(IplImage*);
 
 void COG(float*, float*);
 
 
-void bullshit(IplImage *image)
+void findEdge(IplImage *image)
 {
 
-    //IplImage *gray = 0, *bw = 0;
     gray = cvCreateImage(cvSize(image->width, image->height), IPL_DEPTH_8U, 1);
-    
     bw = cvCreateImage(cvSize(image->width, image->height), IPL_DEPTH_8U, 1);
+
     cvCvtColor(frame, gray, CV_BGR2GRAY);
     cvThreshold(gray, bw, 200, 255, CV_THRESH_BINARY);
-
-    
-    //cvShowImage("bw", bw);
 
     int intensity = 0, accum = 0;
     int x, y;
@@ -73,12 +69,13 @@ int main( int argc, char** argv )
     //display original video stream
     cvNamedWindow("stream", CV_WINDOW_AUTOSIZE);
     //cvNamedWindow("edges", CV_WINDOW_AUTOSIZE);
-    cvNamedWindow("hue", CV_WINDOW_AUTOSIZE);
-    //cvMoveWindow("edges", 400, 0);
+    cvNamedWindow("hue", CV_WINDOW_NORMAL);
+    cvResizeWindow("hue", 320, 240);
+    cvMoveWindow("hue", 640, 0);
 
 
-        CvFont font;
-        cvInitFont(&font, CV_FONT_HERSHEY_SIMPLEX, 1.0, 1.0, 0, 2, CV_AA);
+    CvFont font;
+    cvInitFont(&font, CV_FONT_HERSHEY_SIMPLEX, 1.0, 1.0, 0, 2, CV_AA);
 
     //keep capturing frames until escape
     while(c != 27) //27 is escape key
@@ -87,14 +84,13 @@ int main( int argc, char** argv )
         if(!(frame = cvQueryFrame(capture))) break;
 
         //show the default image
-//        cvShowImage("stream", frame);
+        //cvShowImage("stream", frame);
 
         //edge detection - todo: HSV color filtering
-        doShit(frame);
-
+        findLine(frame);
 
         //edge detection
-        bullshit(frame);
+        findEdge(frame);
 
         if(flag)
             cvPutText(frame, "edge", cvPoint(30, 400), &font, cvScalar(255, 0, 0, 0));
@@ -107,26 +103,14 @@ int main( int argc, char** argv )
         sprintf(y_coord, "%1.2f", cog_y);
         //printf("%s\n", x_coord);
         //printf("%s\n", y_coord);
-        
         //CvFont font;
         //cvInitFont(&font, CV_FONT_HERSHEY_SIMPLEX, 1.0, 1.0, 0, 2, CV_AA);
-        cvPutText(frame, "x:", cvPoint(0,300), &font, cvScalar(255, 0, 0, 0));
+        //cvPutText(frame, "x:", cvPoint(0,300), &font, cvScalar(255, 0, 0, 0));
         cvPutText(frame, "y:", cvPoint(0,350), &font, cvScalar(255, 0, 0, 0));
 
-        cvPutText(frame, x_coord, cvPoint(30,300), &font, cvScalar(255, 0, 0, 0));
+        //cvPutText(frame, x_coord, cvPoint(30,300), &font, cvScalar(255, 0, 0, 0));
         cvPutText(frame, y_coord, cvPoint(30,350), &font, cvScalar(255, 0, 0, 0));
 
-
-        //avoid memory leaks
-        /*
-        cvReleaseImage(&image);
-        cvReleaseImage(&red);
-        cvReleaseImage(&green);
-        cvReleaseImage(&red_edge);
-        cvReleaseImage(&green_edge);
-        cvReleaseImage(&edge);
-        */
-        
         cvShowImage("stream", frame);
         c = cvWaitKey(10);
     }
@@ -146,7 +130,7 @@ int main( int argc, char** argv )
 }
 
 
-void doShit(IplImage *image)
+void findLine(IplImage *image)
 {
 
     IplImage *hsv = cvCreateImage(cvGetSize(image), 8, 3);
@@ -155,7 +139,6 @@ void doShit(IplImage *image)
     cvCvtColor(image, hsv, CV_BGR2HSV);
 
     cvSplit(hsv, hue, 0, 0, 0);
-    
 
     thresh = cvCreateImage(cvSize(image->width, image->height), IPL_DEPTH_8U, 1);
     cvThreshold(hue, thresh, 30, 255, CV_THRESH_BINARY_INV);
@@ -170,7 +153,6 @@ void doShit(IplImage *image)
     red = cvCreateImage(cvSize(image->width,image->height), IPL_DEPTH_8U, 1);
     green = cvCreateImage(cvSize(image->width,image->height), IPL_DEPTH_8U, 1);
     cvSplit(image, NULL, green, red, NULL);
-    
     red_edge = cvCreateImage(cvSize(image->width,image->height), IPL_DEPTH_8U, 1);
     green_edge = cvCreateImage(cvSize(image->width,image->height), IPL_DEPTH_8U, 1);
     cvCanny(red, red_edge, low, high, 3);
@@ -202,15 +184,6 @@ void doShit(IplImage *image)
     //cvNamedWindow("final", CV_WINDOW_AUTOSIZE);
     //cvShowImage("edges", final);
 
-    //cvWaitKey(0);
-    /*
-    cvReleaseImage(&image);
-    cvReleaseImage(&red);
-    cvReleaseImage(&green);
-    cvReleaseImage(&red_edge);
-    cvReleaseImage(&green_edge);
-    cvReleaseImage(&edge);
-    */
 }
 
 void COG(float *X, float *Y)
