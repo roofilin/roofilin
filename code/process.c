@@ -10,6 +10,7 @@
 #include <stdio.h>
 #endif
 
+//james sucks
 
 IplImage *image = 0, *red = 0, *red_edge = 0, *green = 0, *green_edge = 0, *edge = 0;
 IplImage *final = 0;
