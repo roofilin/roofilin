@@ -60,7 +60,7 @@ int main( int argc, char** argv )
     int c = 0, fps = 0;
 
     //capture from camera
-    CvCapture *capture = cvCaptureFromCAM(1);
+    CvCapture *capture = cvCaptureFromCAM(0);
     //quit if camera not found
     if(!capture) {
         printf("cannot init capture!\n");
@@ -112,7 +112,7 @@ int main( int argc, char** argv )
         //cvInitFont(&font, CV_FONT_HERSHEY_SIMPLEX, 1.0, 1.0, 0, 2, CV_AA);
 
         //cvPutText(frame, x_coord, cvPoint(10,300), &font, cvScalar(0, 255, 0, 0));
-        cvPutText(frame, y_coord, cvPoint(10,350), &font, cvScalar(0, 255, 0, 0));
+        cvPutText(frame, y_coord, cvPoint(10,350), &font, cvScalar(255, 0, 0, 0));
 
 
         //avoid memory leaks
