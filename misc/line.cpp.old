@@ -1,0 +1,21 @@
+#include "cvaux.h"
+#include "highui.h"
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+using namespace cv;
+using namespace std;
+
+int main(int argc, char** argv)
+{
+    //load the image
+    Mat img = imread("1-small.jpg");
+
+    //display
+    namedWindow("1", CV_WINDOW_AUTOSIZE);
+    imshow("1", img);
+
+
+}
+
