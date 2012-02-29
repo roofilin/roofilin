@@ -27,6 +27,8 @@ void bullshit()
 {
     //IplImage *gray = 0, *bw = 0;
     gray = cvCreateImage(cvSize(image->width, image->height), IPL_DEPTH_8U, 1);
+
+    bw = cvCreateImage(cvSize(image->width, image->height), IPL_DEPTH_8U, 1);
     cvCvtColor(frame, gray, CV_BGR2GRAY);
     cvThreshold(gray, bw, 128, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
 
@@ -84,7 +86,7 @@ int main( int argc, char** argv )
 
 
         //edge detection
-        bullshit(frame);
+        bullshit();
 
         if(flag)
             cvPutText(frame, "edge", cvPoint(10, 400), &font, cvScalar(0, 255, 0, 0));
