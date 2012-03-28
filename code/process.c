@@ -20,12 +20,47 @@ float cog_x = 0.0, cog_y = 0.0;
 IplImage *gray = 0, *bw = 0;
 int flag = 0;
 
-
 void findLine(IplImage*);
-void findEdge(IplImage*);
+
 void COG(float*, float*);
 
 
+void findEdge(IplImage *image)
+{
+
+    gray = cvCreateImage(cvSize(image->width, image->height), IPL_DEPTH_8U, 1);
+    bw = cvCreateImage(cvSize(image->width, image->height), IPL_DEPTH_8U, 1);
+
+    cvCvtColor(frame, gray, CV_BGR2GRAY);
+    cvThreshold(gray, bw, 200, 255, CV_THRESH_BINARY);
+
+    int intensity = 0, right_accum = 0, left_accum = 0, accum = 0;
+    int x, y;
+    for(x = 0; x < bw->width; x++)
+    {
+        for(y = 0; y < bw->height; y++)
+        {
+            //printf("%d\n", intensity);
+            intensity = (int)(cvGetReal2D(bw, y, x)/255);
+            if(x >= 320)
+                right_accum += intensity;
+            else
+                left_accum += intensity;
+            //accum += intensity;
+        }
+    }
+    //printf("%d\n", accum);
+    //printf("width: %d, height:%d\n", image->width, image->height);
+    accum = left_accum + right_accum;
+    if(accum > 10000)
+    {
+        if(right_accum > left_accum)
+            flag = 2; //edge on right
+        else
+            flag = 1; //edge on left;
+    }
+    else flag = 0;
+}
 
 int main( int argc, char** argv )
 {
@@ -162,45 +197,6 @@ void findLine(IplImage *image)
     //cvShowImage("edges", final);
 
 }
-
-
-void findEdge(IplImage *image)
-{
-
-    gray = cvCreateImage(cvSize(image->width, image->height), IPL_DEPTH_8U, 1);
-    bw = cvCreateImage(cvSize(image->width, image->height), IPL_DEPTH_8U, 1);
-
-    cvCvtColor(frame, gray, CV_BGR2GRAY);
-    cvThreshold(gray, bw, 200, 255, CV_THRESH_BINARY);
-
-    int intensity = 0, right_accum = 0, left_accum = 0, accum = 0;
-    int x, y;
-    for(x = 0; x < bw->width; x++)
-    {
-        for(y = 0; y < bw->height; y++)
-        {
-            //printf("%d\n", intensity);
-            intensity = (int)(cvGetReal2D(bw, y, x)/255);
-            if(x >= 320)
-                right_accum += intensity;
-            else
-                left_accum += intensity;
-            //accum += intensity;
-        }
-    }
-    //printf("%d\n", accum);
-    //printf("width: %d, height:%d\n", image->width, image->height);
-    accum = left_accum + right_accum;
-    if(accum > 10000)
-    {
-        if(right_accum > left_accum)
-            flag = 2; //edge on right
-        else
-            flag = 1; //edge on left;
-    }
-    else flag = 0;
-}
-
 
 void COG(float *X, float *Y)
 {
