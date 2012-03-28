@@ -5,29 +5,24 @@
 #define CV_NO_BACKWARD_COMPATIBILITY
 
 #ifndef _EiC
+
+//opencv stuff
 #include "cv.h"
 #include "highgui.h"
+
+//c stuff
 #include <stdio.h>
-
-
-
-
-
-//serial
 #include <stdlib.h>
 #include <stdint.h>   /* Standard types */
 #include <string.h>   /* String function definitions */
 #include <unistd.h>   /* UNIX standard function definitions */
+
+//serial io stuff
 #include <fcntl.h>    /* File control definitions */
 #include <errno.h>    /* Error number definitions */
 #include <termios.h>  /* POSIX terminal control definitions */
 #include <sys/ioctl.h>
 #include <getopt.h>
-
-
-
-
-
 
 #endif
 
@@ -193,58 +188,25 @@ printf("%1.2f\n", right_y);
 }
 
 
+/*
+ * findLine
+ * hsv line detection
+ */
 void findLine(IplImage *image)
 {
     IplImage *hsv = cvCreateImage(cvGetSize(image), 8, 3);
     IplImage *hue = cvCreateImage(cvGetSize(image), 8, 1);
-
     cvCvtColor(image, hsv, CV_BGR2HSV);
-
     cvSplit(hsv, hue, 0, 0, 0);
-
     thresh = cvCreateImage(cvSize(image->width, image->height), IPL_DEPTH_8U, 1);
     cvThreshold(hue, thresh, 30, 255, CV_THRESH_BINARY_INV);
-
     cvShowImage("hue", thresh);
-
-    /*
-    // Extract red channel of image
-    red = cvCreateImage(cvSize(image->width,image->height), IPL_DEPTH_8U, 1);
-    green = cvCreateImage(cvSize(image->width,image->height), IPL_DEPTH_8U, 1);
-    cvSplit(image, NULL, green, red, NULL);
-    red_edge = cvCreateImage(cvSize(image->width,image->height), IPL_DEPTH_8U, 1);
-    green_edge = cvCreateImage(cvSize(image->width,image->height), IPL_DEPTH_8U, 1);
-    cvCanny(red, red_edge, low, high, 3);
-    cvCanny(green, green_edge, low, high, 3);
-
-    edge = cvCreateImage(cvSize(image->width,image->height), IPL_DEPTH_8U, 1);
-
-    cvAbsDiff(red_edge, green_edge, edge);
-
-    final = cvCreateImage(cvSize((image->width&-2)/2,(image->height&-2)/2), IPL_DEPTH_8U, 1);
-
-    cvPyrDown(edge, final, CV_GAUSSIAN_5x5);   //
-    cvSmooth(final, final, CV_BLUR, 3, 0, 0, 0);
-    cvCanny(final, final, 1.0f, 250.0f, 3);
-    cvPyrUp(final, edge, CV_GAUSSIAN_5x5);
-    //cvResize(edge, final, CV_INTER_AREA);
-    //cvCanny(final, final, 100.0f, 200.0f, 3);
-    //cvResize(final, edge, CV_INTER_AREA);
-    //cvErode(edge, edge, cvCreateStructuringElementEx(1,1,0,0,CV_SHAPE_RECT,NULL), 1);
-    //cvSmooth(edge, edge, CV_GAUSSIAN, 3, 0, 0, 0);
-    //cvCanny(edge, edge, low, high, 3);
-
-    //cvNamedWindow("red channel", CV_WINDOW_AUTOSIZE);
-    //cvShowImage("red channel", red);
-
-    //cvNamedWindow("edges", CV_WINDOW_AUTOSIZE);
-    //cvShowImage("edges", edge);
-
-    //cvNamedWindow("final", CV_WINDOW_AUTOSIZE);
-    //cvShowImage("edges", final);
-    */
 }
 
+/*
+ * findEdge
+ * 1 for leftEdge, 2 for rightEdge
+ */
 void findEdge(IplImage *image)
 {
     gray = cvCreateImage(cvSize(image->width, image->height), IPL_DEPTH_8U, 1);
@@ -253,39 +215,39 @@ void findEdge(IplImage *image)
     cvCvtColor(frame, gray, CV_BGR2GRAY);
     cvThreshold(gray, bw, 200, 255, CV_THRESH_BINARY);
 
-    int intensity = 0, right_accum = 0, left_accum = 0, accum = 0;
+    int intensity = 0, left_accum = 0, right_accum = 0;
     int x, y;
+
     for(x = 0; x < bw->width; x++)
     {
         for(y = 0; y < bw->height; y++)
         {
-            //printf("%d\n", intensity);
             intensity = (int)(cvGetReal2D(bw, y, x)/255);
-            if(x >= 320)
-                right_accum += intensity;
-            else
-                left_accum += intensity;
-            //accum += intensity;
+            if(x <= 40) left_accum += intensity;
+            else if(x >= bw->width-40) right_accum += intensity;
         }
     }
-    
-    accum = left_accum + right_accum;
-    if(accum > 10000)
-    {
-        if(right_accum > left_accum)
-            flag = 2; //edge on right
-        else
-            flag = 1; //edge on left;
-    }
-    else flag = 0;
+
+    //edge on left
+    if((left_accum>5000) && (left_accum>right_accum)) flag = 1;
+    //edge on right
+    else if((right_accum>5000) && (right_accum>left_accum)) flag = 2;
+    //neither edge
+    else flag  = 0;
 }
 
+/*
+ * COG
+ * find x and y coordinates of center of image
+ */
 void COG(float *X, float *Y)
 {
     float intensity = 0.0, accum = 0.0;
     int x, y;
+
     *X = 0.0;
     *Y = 0.0;
+
     for(x = 0; x < thresh->width; x++)
     {
         for(y = 0; y < thresh->height; y++)
@@ -296,18 +258,24 @@ void COG(float *X, float *Y)
             accum += intensity;
         }
     }
-
     *X /= accum;
     *Y /= accum;
 }
 
+
+/*
+ * COG_edges
+ * find intersection of chalkline with either edge
+ */
 void COG_edges(float *Y_left, float *Y_right)
 {
     float intensity = 0.0, accum = 0.0;
     int x, y;
+
     *Y_left = 0.0;
     *Y_right = 0.0;
-    for(x = 0; x < 80; x++)
+
+    for(x = 0; x < 40; x++)
     {
         for(y = 0; y < thresh->height; y++)
         {
@@ -318,9 +286,8 @@ void COG_edges(float *Y_left, float *Y_right)
     }
     *Y_left /= accum;
 
-accum = 0.0;
-    
-    for(x = thresh->width-80; x < thresh->width; x++)
+    accum = 0.0;
+    for(x = thresh->width-40; x < thresh->width; x++)
     {
         for(y = 0; y < thresh->height; y++)
         {
@@ -332,18 +299,15 @@ accum = 0.0;
     *Y_right /= accum;
 }
 
-//////////////////
-//////////////////
-//serial communication
+/*
+ * serialport_init
+ * initializes serial port
+ */
 int serialport_init(const char* serialport, int baud)
 {
     struct termios toptions;
     int fd;
 
-    //fprintf(stderr,"init_serialport: opening port %s @ %d bps\n",
-    //      serialport,baud);
-
-    //fd = open(serialport, O_RDWR | O_NOCTTY | O_NDELAY);
     fd = open(serialport, O_RDWR | O_NOCTTY);
     if (fd == -1)  {
       perror("init_serialport: Unable to open port ");
@@ -355,6 +319,8 @@ int serialport_init(const char* serialport, int baud)
       return -1;
     }
     speed_t brate = baud; // let you override switch below if needed
+
+/*
     switch(baud) {
     case 4800:   brate=B4800;   break;
     case 9600:   brate=B9600;   break;
@@ -371,6 +337,8 @@ int serialport_init(const char* serialport, int baud)
     case 57600:  brate=B57600;  break;
     case 115200: brate=B115200; break;
     }
+*/
+
     cfsetispeed(&toptions, brate);
     cfsetospeed(&toptions, brate);
 
