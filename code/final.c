@@ -44,7 +44,7 @@ int flag = 0;
 //set on detection of offset slant
 int offset = 0;
 int slant = 0;
-int ROL, ROR = 0;
+int ROL = 0, ROR = 0;
 
 //count tells us which shingle should be placed next
 /*
@@ -54,7 +54,7 @@ int ROL, ROR = 0;
 |2|1|0|
  - - -
 */
-int count = 0;
+int count = 1;      //FIXME
 
 //function prototypes
 void findLine(IplImage*);
@@ -164,6 +164,8 @@ int main( int argc, char** argv )
         }
         else if(ROR) //rotate right (eventually look at angle and change timing appropriately)
         {
+            printf("%s\n", "ROTATE RIGHT");
+            sleep(2);
             b = 0b00000101;
             sprintf(motor1, "%s", "forward");
             sprintf(motor2, "%s", "backward");
@@ -171,6 +173,8 @@ int main( int argc, char** argv )
         }
         else if(ROL) //rotate left (eventually look at angle and change timing appropriately)
         {
+            printf("%s\n", "ROTATE LEFT");
+            sleep(2);
             b = 0b00000110;
             sprintf(motor1, "%s", "backward");
             sprintf(motor2, "%s", "forward");
@@ -187,7 +191,7 @@ int main( int argc, char** argv )
 				case 0:
 				b = 0b00000000;	//do nothing
 				write(fd,&b,1);
-				sleep(6); //however long it takes to place shingle, or wait until arduino says go
+				//sleep(6); //however long it takes to place shingle, or wait until arduino says go
                 printf("%s\n", "case 0");
 				break;
 				
@@ -196,7 +200,7 @@ int main( int argc, char** argv )
 				case 2:
 				b = 0b01000000;	//forward 1 foot
 				write(fd,&b,1);
-				sleep(6);
+				sleep(3);
                 printf("%s\n", "case 1/2");
 				break;
 				
@@ -208,7 +212,7 @@ int main( int argc, char** argv )
 				write(fd,&b,1);
 				b = 0b00100011;	//backward 1/2 foot
 				write(fd,&b,1);
-				sleep(12);
+				//sleep(12);
                 printf("%s\n", "case 3");
 				break;
 				
@@ -220,7 +224,7 @@ int main( int argc, char** argv )
 				write(fd,&b,1);
 				b = 0b00110001;	//ROR 90 degrees
 				write(fd,&b,1);
-				sleep(14);
+				//sleep(14);
                 printf("%s\n", "case 4");
 				break;
 				
@@ -230,14 +234,14 @@ int main( int argc, char** argv )
 				write(fd,&b,1);
 				b = 0b00110001;	//ROR 90 degrees
 				write(fd,&b,1);
-				sleep(8);
+				//sleep(8);
 				break;
 				
 				//next to left overhang
 				case 6:
 				b = 0b01000000;	//forward 1 foot
 				write(fd,&b,1);
-				sleep(6);
+				//sleep(6);
 				break;
 				
 				//reposition at beginning position 
@@ -250,18 +254,18 @@ int main( int argc, char** argv )
 				write(fd,&b,1);
 				b = 0b01100011;	//backward 1+1/2 foot
 				write(fd,&b,1);
-                sleep(14);
+                //sleep(14);
                 break;
 				
 				//should not get here
 				default:
 				b = 0; //error
 				write(fd,&b,1);
-				sleep(20);
+				//sleep(20);
 				break;
 			}
 			
-			count = (count+1)%8;
+			//count = (count+1)%8;      //FIXME
         }
             
         
@@ -375,14 +379,14 @@ void findSlant(IplImage* image)
 	}
 	
 	//rotate right
-    if(left_y - right_y < -15){
-	//if((int)(left_y/10.0) - (int)(right_y/10.0) < -2) {
+    //if(left_y - right_y < -15){
+	if((int)(left_y/10.0) - (int)(right_y/10.0) < -1) {
 		slant = 1;
 		ROR = 1;
 	}
 	//rotate left
-    else if(right_y - left_y < -15){
-	//else if((int)(right_y/10.0) - (int)(left_y/10.0) < -2) {
+    //else if(right_y - left_y < -15){
+	else if((int)(right_y/10.0) - (int)(left_y/10.0) < -1) {
 		slant = 1;
 		ROL = 1;
 	}
