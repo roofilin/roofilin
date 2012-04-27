@@ -5,7 +5,7 @@ if [ $# -gt 0 ] ; then
 	echo "compiling $base"
 	gcc -ggdb `pkg-config opencv --cflags --libs` $base.c -o $base 
 else
-	for i in *.c; do
+	for i in apr18.c; do
 	    echo "compiling $i"
 	    gcc -ggdb `pkg-config --cflags opencv` -o `basename $i .c` $i `pkg-config --libs opencv`;
 	done

@@ -75,7 +75,7 @@ int main( int argc, char** argv )
     char serialport[256];
     int baudrate = B19200;
     //FIXME
-    fd = serialport_init("/dev/ttyUSB0", baudrate);
+    fd = serialport_init("/dev/ttyACM0", baudrate);
             if(fd==-1) return -1;
     usleep(3000 * 1000);
     ///////////////////////////////////////////////////////
@@ -152,7 +152,7 @@ int main( int argc, char** argv )
         //might have to flip these
         
         //left, right -> looking from top of roof down
-        if(flag == 2) //edge on right
+        if(0)//flag == 2) //edge on right
         {
             b = 0b00000111;    
             sprintf(motor1, "%s", "backward");
@@ -160,7 +160,7 @@ int main( int argc, char** argv )
             write(fd,&b,1);
             while(read(fd,&rb,1) != 1) ;
         }
-        else if(flag == 1) //edge on left
+        else if(0)//flag == 1) //edge on left
         {
             b = 0b00000100;
             sprintf(motor1, "%s", "forward");
@@ -168,7 +168,7 @@ int main( int argc, char** argv )
             write(fd,&b,1);
             while(read(fd,&rb,1) != 1) ;
         }
-        else if(ROR) //rotate right (eventually look at angle and change timing appropriately)
+        else if(0)//ROR) //rotate right (eventually look at angle and change timing appropriately)
         {
             printf("%s\n", "ROTATE RIGHT");
             b = 0b00000101;
@@ -177,7 +177,7 @@ int main( int argc, char** argv )
             write(fd,&b,1);
             while(read(fd,&rb,1) != 1) ;
         }
-        else if(ROL) //rotate left (eventually look at angle and change timing appropriately)
+        else if(0)//ROL) //rotate left (eventually look at angle and change timing appropriately)
         {
             printf("%s\n", "ROTATE LEFT");
             b = 0b00000110;
@@ -244,7 +244,8 @@ int main( int argc, char** argv )
                 b = 0b00000000;    //do nothing
                 write(fd,&b,1);
             while(read(fd,&rb,1) != 1) ;
-                //sleep(6); //however long it takes to place shingle, or wait until arduino says go
+                printf("%d\n", rb);
+                sleep(6); //however long it takes to place shingle, or wait until arduino says go
                 printf("%s\n", "case 0");
                 break;
                 
@@ -333,7 +334,7 @@ int main( int argc, char** argv )
                 break;
             }
             
-            //count = (count+1)%8;      //FIXME
+            count = (count+1)%8;      //FIXME
         }
             
         
