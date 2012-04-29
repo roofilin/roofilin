@@ -6,13 +6,7 @@
   //int LEFT_In1=10;  //forward
   //int LEFT_In2=11;  //reverse
   
-  //HIGH is forward, LOW backward. check LEFT/RIGHT
-  /*
-  int RIGHT_DIR = 4;
-  int RIGHT_SPEED = 5;
-  int LEFT_DIR = 7;
-  int LEFT_SPEED = 6;
-  */
+
   
   //right = inner, left = outer
   //outer wheel

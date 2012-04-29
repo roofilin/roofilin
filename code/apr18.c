@@ -55,7 +55,7 @@ int MOVEUP = 0, MOVEDOWN = 0;
 |2|1|0|
  - - -
 */
-int count = 0;      //FIXME
+uint8_t count = 0;      //FIXME
 
 //function prototypes
 void findLine(IplImage*);
@@ -237,6 +237,7 @@ int main( int argc, char** argv )
         //the arduino is responsible for sending stop command to wheels!
         else
         {
+            /*
             switch(count)
             {
                 //first shingle - already in place
@@ -248,7 +249,6 @@ int main( int argc, char** argv )
                 sleep(6); //however long it takes to place shingle, or wait until arduino says go
                 printf("%s\n", "case 0");
                 break;
-                
                 //second/third shingle - drive forward one foot (for now 2 secs, figure this out!)
                 case 1:
                 case 2:
@@ -258,7 +258,6 @@ int main( int argc, char** argv )
                 //sleep(3);
                 printf("%s\n", "case 1/2");
                 break;
-                
                 //left (viewing from bottom) overhang
                 case 3:
                 b = 0b00100011;    //backward 1/2 foot
@@ -273,7 +272,6 @@ int main( int argc, char** argv )
                 //sleep(12);
                 printf("%s\n", "case 3");
                 break;
-                
                 //right overhang
                 case 4:
                 b = 0b00110001;    //ROR 90 degrees
@@ -288,7 +286,6 @@ int main( int argc, char** argv )
                 //sleep(14);
                 printf("%s\n", "case 4");
                 break;
-                
                 //next to right overhang
                 case 5:
                 b = 0b01000011;    //backward 1 foot
@@ -299,7 +296,6 @@ int main( int argc, char** argv )
             while(read(fd,&rb,1) != 1) ;
                 //sleep(8);
                 break;
-                
                 //next to left overhang
                 case 6:
                 b = 0b01000000;    //forward 1 foot
@@ -307,8 +303,7 @@ int main( int argc, char** argv )
             while(read(fd,&rb,1) != 1) ;
                 //sleep(6);
                 break;
-                
-                //reposition at beginning position 
+                //reposition at beginning position
                 case 7:
                 b = 0b00110001;    //ROR 90 degrees
                 write(fd,&b,1);
@@ -324,7 +319,6 @@ int main( int argc, char** argv )
             while(read(fd,&rb,1) != 1) ;
                 //sleep(14);
                 break;
-                
                 //should not get here
                 default:
                 b = 0; //error
@@ -333,24 +327,19 @@ int main( int argc, char** argv )
                 //sleep(20);
                 break;
             }
-            
+        */
+            write(fd, &count, 1);
+            while(read(fd, &rb, 1) != 1) ;
             count = (count+1)%8;      //FIXME
         }
-            
-        
-        //SERIAL - motor logic
-        //xxxx_xxyy -> y = motor1/motor2, 0 = forward, 1 = backward, x = time in ms
-        //edges
-
-        //write(fd,&b,1);
 
         //cvPutText(frame, x_coord, cvPoint(30,300), &font, cvScalar(255, 0, 0, 0));
         cvPutText(frame, "y:", cvPoint(0,350), &font, cvScalar(255, 0, 0, 0));
         cvPutText(frame, y_coord, cvPoint(30,350), &font, cvScalar(255, 0, 0, 0));
-        cvPutText(frame, "motor1:", cvPoint(0,150), &font, cvScalar(255, 0, 0, 0));
-        cvPutText(frame, motor1, cvPoint(150,150), &font, cvScalar(255, 0, 0, 0));
-        cvPutText(frame, "motor2:", cvPoint(0,200), &font, cvScalar(255, 0, 0, 0));
-        cvPutText(frame, motor2, cvPoint(150,200), &font, cvScalar(255, 0, 0, 0));
+        //cvPutText(frame, "motor1:", cvPoint(0,150), &font, cvScalar(255, 0, 0, 0));
+        //cvPutText(frame, motor1, cvPoint(150,150), &font, cvScalar(255, 0, 0, 0));
+        //cvPutText(frame, "motor2:", cvPoint(0,200), &font, cvScalar(255, 0, 0, 0));
+        //cvPutText(frame, motor2, cvPoint(150,200), &font, cvScalar(255, 0, 0, 0));
 
         cvPutText(frame, write_slant, cvPoint(0,50), &font, cvScalar(255, 0,
                     0, 0));
